@@ -9,5 +9,6 @@ dependencies = [
     "langsmith>=0.4.25",
     "pathlib>=1.0.1",
     "pydantic>=2.11.7",
+    "python-multipart>=0.0.20",
     "uvicorn>=0.35.0",
 ]
