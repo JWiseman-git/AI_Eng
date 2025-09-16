@@ -4,6 +4,8 @@ from pydantic import BaseModel
 from typing import Dict
 import json
 import hashlib
+from fastapi.middleware.cors import CORSMiddleware
+
 
 # ------------------------------
 # Mock DB setup (JSON file)
@@ -25,7 +27,13 @@ def save_students(students: Dict[int, dict]):
 # FastAPI setup
 # ------------------------------
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # ------------------------------
 # OAuth2 setup
 # ------------------------------
