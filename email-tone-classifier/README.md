@@ -33,7 +33,7 @@ email-tone-classifier/
 - Python 3.11+
 - [uv](https://docs.astral.sh/uv/) package manager
 - Anthropic API key
-- Langfuse account (free tier at https://cloud.langfuse.com)
+- Docker and Docker Compose (for local Langfuse)
 - Node.js 18+ (for Promptfoo CLI)
 
 ## Setup (~15 min)
@@ -45,18 +45,30 @@ cd email-tone-classifier
 uv sync
 ```
 
-### 2. Set up Langfuse
+### 2. Run Langfuse locally
 
-1. Sign up at https://cloud.langfuse.com (free tier is fine)
+Start a local Langfuse instance using Docker:
+
+```bash
+# Clone the Langfuse repo (one-time setup)
+git clone https://github.com/langfuse/langfuse.git
+cd langfuse
+docker compose up -d
+```
+
+Once running, Langfuse is available at **http://localhost:3000**.
+
+1. Open http://localhost:3000 and create an account (data stays local)
 2. Create a new project called "email-tone-classifier"
 3. Go to Settings → API Keys → Create new key
-4. Copy the public key, secret key, and host URL
+4. Copy the public key and secret key
 
 ### 3. Configure environment
 
 ```bash
 cp .env.example .env
-# Edit .env with your keys
+# Edit .env with your Langfuse API keys
+# LANGFUSE_HOST is already set to http://localhost:3000
 ```
 
 ### 4. Install Promptfoo CLI
@@ -73,7 +85,7 @@ Run the demo to send traced requests through Langfuse:
 uv run python -m src.demo
 ```
 
-Then open your Langfuse dashboard to explore:
+Then open your local Langfuse dashboard at http://localhost:3000 to explore:
 - **Traces** — each classification is a full trace
 - **Generations** — see the exact prompt/completion for each LLM call
 - **Cost tracking** — token usage and estimated cost per call
