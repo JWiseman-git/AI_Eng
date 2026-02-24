@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.116.1",
+    "langchain-decorators>=1.0.0",
     "langsmith>=0.4.25",
     "pathlib>=1.0.1",
     "pydantic>=2.11.7",
