@@ -1,7 +1,5 @@
-# Email Tone Classifier — Langfuse + Promptfoo Workshop
+# Email Tone Classifier 
 
-A hands-on ~2 hour project to learn **Langfuse** (LLM observability/tracing) and
-**Promptfoo** (prompt evaluation) using the Anthropic API.
 
 ## What You'll Learn
 

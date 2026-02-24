@@ -51,6 +51,59 @@ SAMPLE_EMAILS = [
         ),
         "expected": "angry",
     },
+    # -- Hard / likely-to-misclassify examples --
+    {
+        # Passive-aggressive politeness — sounds formal but the intent is angry.
+        # Classifiers often label this "formal" instead of "angry".
+        "email": (
+            "Dear Support Team, I trust you are well. I am once again reaching out "
+            "regarding the unresolved billing discrepancy from last quarter. I have "
+            "now sent four emails on this matter without a single substantive reply. "
+            "I would appreciate your earliest attention. Kindest regards, Marcus."
+        ),
+        "expected": "angry",
+    },
+    {
+        # Casual register + emoji, but the situation is a live outage — urgent.
+        # Classifiers often latch onto the casual style and miss the urgency.
+        "email": (
+            "hey team 👋 so uh… the prod DB just went read-only like 10 mins ago "
+            "and orders are failing 😬 someone pls take a look asap?? thx"
+        ),
+        "expected": "urgent",
+    },
+    {
+        # Warm, friendly opener wrapping a formal request letter.
+        # Classifiers often return "friendly" instead of "formal".
+        "email": (
+            "Hi Sarah! It was wonderful catching up at the summit last week. "
+            "I am writing to formally submit our department's budget proposal for "
+            "FY 2026, as outlined in the attached documentation. Please confirm "
+            "receipt at your earliest convenience. Warm regards, Priya."
+        ),
+        "expected": "formal",
+    },
+    {
+        # Dripping sarcasm — reads superficially as friendly/positive praise.
+        # Classifiers frequently return "friendly" instead of "angry".
+        "email": (
+            "Wow, another missed deadline — truly impressive! I guess waiting six "
+            "weeks for a two-page report is just how we do things here now. "
+            "Fantastic work, everyone. Really setting the bar high."
+        ),
+        "expected": "angry",
+    },
+    {
+        # Formal vocabulary but the message is a casual social invitation.
+        # Classifiers often return "formal" instead of "casual".
+        "email": (
+            "Dear Jordan, I am reaching out to inquire as to whether you would be "
+            "amenable to joining us for a small gathering at my residence this "
+            "Saturday evening. Nothing too elaborate — just a few friends, some "
+            "drinks, and good conversation. Do let me know! Cheers, Oliver."
+        ),
+        "expected": "casual",
+    },
 ]
 
 
