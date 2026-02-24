@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import re
 
-import anthropic
+import openai
 from langfuse import Langfuse
 
 from src.prompts import ALL_VARIANTS, PromptVariant
@@ -19,13 +19,13 @@ from src.prompts import ALL_VARIANTS, PromptVariant
 # Valid tone labels the classifier can return
 VALID_TONES = frozenset({"formal", "casual", "urgent", "friendly", "angry"})
 
-MODEL = "claude-sonnet-4-20250514"
+MODEL = "gpt-4o"
 
 
 class ToneClassifier:
-    """Classifies email tone using Claude, with full Langfuse tracing."""
+    """Classifies email tone using OpenAI, with full Langfuse tracing."""
 
-    def __init__(self, langfuse: Langfuse, client: anthropic.Anthropic) -> None:
+    def __init__(self, langfuse: Langfuse, client: openai.OpenAI) -> None:
         self.langfuse = langfuse
         self.client = client
 
@@ -82,23 +82,25 @@ class ToneClassifier:
             metadata={"variant": variant_name},
         )
 
-        response = self.client.messages.create(
+        response = self.client.chat.completions.create(
             model=MODEL,
             max_tokens=256,
             temperature=0.0,
-            system=variant.system,
-            messages=[{"role": "user", "content": user_content}],
+            messages=[
+                {"role": "system", "content": variant.system},
+                {"role": "user", "content": user_content},
+            ],
         )
 
-        raw_text = response.content[0].text
+        raw_text = response.choices[0].message.content
         usage = response.usage
 
         generation.end(
             output=raw_text,
             usage={
-                "input": usage.input_tokens,
-                "output": usage.output_tokens,
-                "total": usage.input_tokens + usage.output_tokens,
+                "input": usage.prompt_tokens,
+                "output": usage.completion_tokens,
+                "total": usage.total_tokens,
             },
         )
 

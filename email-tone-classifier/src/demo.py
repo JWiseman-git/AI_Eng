@@ -6,7 +6,7 @@ Usage:
 
 from __future__ import annotations
 
-import anthropic
+import openai
 from dotenv import load_dotenv
 from langfuse import Langfuse
 
@@ -110,7 +110,7 @@ SAMPLE_EMAILS = [
 def run_demo() -> None:
     """Classify all sample emails with every prompt variant."""
     langfuse = Langfuse()
-    client = anthropic.Anthropic()
+    client = openai.OpenAI()
     classifier = ToneClassifier(langfuse=langfuse, client=client)
 
     print("=" * 60)
