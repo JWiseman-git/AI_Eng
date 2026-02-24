@@ -104,6 +104,143 @@ SAMPLE_EMAILS = [
         ),
         "expected": "casual",
     },
+
+    # -- Long-form examples (produce larger traces) --
+    {
+        # Multi-paragraph formal legal/compliance notice.
+        # Length and dense structure stress-test the chain-of-thought variant.
+        "email": (
+            "Dear Mr. Henderson,\n\n"
+            "I am writing on behalf of Meridian Financial Services Ltd. to formally "
+            "notify you of a material change to the terms and conditions governing "
+            "your account, effective 1 April 2026. This communication constitutes "
+            "the required thirty-day written notice as stipulated in Section 14(b) "
+            "of your account agreement dated 12 March 2023.\n\n"
+            "Specifically, the following amendments will take effect: (1) the annual "
+            "maintenance fee will increase from £24.00 to £36.00; (2) the minimum "
+            "balance required to waive said fee will rise from £1,000 to £2,500; "
+            "and (3) international wire transfer charges will be revised from a flat "
+            "£15 to 0.75% of the transferred amount, subject to a minimum of £10 "
+            "and a maximum of £60.\n\n"
+            "Should you wish to dispute these changes or close your account without "
+            "penalty before the effective date, please contact our Client Relations "
+            "team in writing at the address below, or via our secure online portal. "
+            "We are required by the Financial Conduct Authority to retain a copy of "
+            "all such correspondence for a period of not less than five years.\n\n"
+            "Please review the enclosed schedule of revised fees in its entirety. "
+            "Your continued use of the account after 1 April 2026 will constitute "
+            "acceptance of the updated terms. We regret any inconvenience this may "
+            "cause and thank you for your continued custom.\n\n"
+            "Yours sincerely,\nAmelia Frost\nHead of Client Compliance, Meridian FS"
+        ),
+        "expected": "formal",
+    },
+    {
+        # Long, escalating customer complaint — starts politely, ends furious.
+        # The shift in register across paragraphs is hard for classifiers to weight.
+        "email": (
+            "Hi there,\n\n"
+            "I placed order #TK-88271 on 3 January and was quoted a delivery window "
+            "of 5–7 business days. It is now 28 February — nearly two months later — "
+            "and I still do not have my order.\n\n"
+            "I have contacted your support team six times. The first three times I "
+            "was told the parcel was 'in transit'. The fourth time I was told it had "
+            "been 'lost in the warehouse' and a replacement would be dispatched within "
+            "48 hours. That was three weeks ago. The fifth time the agent simply "
+            "disconnected the chat. The sixth time I was placed on hold for 47 minutes "
+            "before being told someone would 'call me back within 24 hours'. That was "
+            "eleven days ago. No one has called.\n\n"
+            "I have now raised a chargeback with my bank and filed a complaint with "
+            "Trading Standards. I am also posting a detailed account of this "
+            "experience to every consumer review platform I can find. I want a full "
+            "refund processed within 48 hours — not a voucher, not store credit, not "
+            "a replacement. A refund. If that does not happen I will be pursuing this "
+            "through the small claims court. I am done being patient.\n\n"
+            "Do not send me another templated apology email."
+        ),
+        "expected": "angry",
+    },
+    {
+        # Long, rambling group-chat-style message about an active production outage.
+        # Casual language and humour mask genuine severity — tricky for classifiers.
+        "email": (
+            "ok so heads up everyone 🚨\n\n"
+            "so i was just doing the routine Monday deploy (yes i know, i know — "
+            "never deploy on Monday, lesson thoroughly learned lmao) and uh… "
+            "things have gone a bit sideways. the payment service is throwing "
+            "NullPointerExceptions on every third request, the checkout page is "
+            "just showing a blank white screen for about 30% of users, and "
+            "Datadog is absolutely losing its mind with alerts rn.\n\n"
+            "i've already rolled back the last commit but the errors are still "
+            "happening which means it's probably not the deploy itself — could be "
+            "the new Stripe webhook config we pushed last Thursday? or possibly "
+            "the Redis cache eviction policy change? idk 😬\n\n"
+            "revenue is definitely being impacted — i can see abandoned carts "
+            "spiking hard in the analytics dashboard. we're probably losing "
+            "somewhere between £200-£500 per minute at current traffic levels.\n\n"
+            "can we get ALL hands on this please? like right now? "
+            "@backend-team can someone dig into the payment service logs? "
+            "@devops can you check if there's anything weird in infra? "
+            "i'm going to start a war-room call in 5 mins, link in #incidents 👇"
+        ),
+        "expected": "urgent",
+    },
+    {
+        # Long, heartfelt team appreciation message with lots of personal detail.
+        # Pure friendly tone sustained across many sentences — good positive example.
+        "email": (
+            "Hey everyone,\n\n"
+            "I just wanted to take a moment — and yes I know we're all slammed "
+            "right now — to say how genuinely grateful I am to be part of this team.\n\n"
+            "The last three months have been a lot. The product pivot, the two "
+            "all-hands firefights, the late nights before the investor demo… none "
+            "of that was easy, and honestly I wasn't sure we were going to pull it "
+            "off. But we did, and it's entirely because of the people in this room "
+            "(or, well, in this Slack channel).\n\n"
+            "Special shout-out to Kenji for completely rewriting the data pipeline "
+            "over a single weekend without being asked — that unblocked the entire "
+            "analytics team for two weeks. And to Rosa, who caught that silent data "
+            "corruption bug at 11pm on a Friday and stayed until 2am to fix it "
+            "rather than leaving it for Monday. That kind of care is rare.\n\n"
+            "I also just want to say: if anyone is feeling burnt out, please tell "
+            "me. We're going to celebrate properly next week — dinner on the company "
+            "card, no laptops, no Slack. You've all more than earned it.\n\n"
+            "Seriously, thank you. I'm lucky to work with you.\n\nTom"
+        ),
+        "expected": "friendly",
+    },
+    {
+        # Long formal academic/research collaboration proposal.
+        # Dense, structured, impersonal — strong formal signal throughout.
+        "email": (
+            "Dear Professor Nakamura,\n\n"
+            "I am writing to formally propose a research collaboration between the "
+            "Computational Linguistics Laboratory at the University of Edinburgh and "
+            "your Natural Language Processing group at Kyoto University, with the "
+            "aim of jointly submitting a grant application to the UKRI–JST bilateral "
+            "research fund, deadline 30 June 2026.\n\n"
+            "Our proposed project, provisionally titled 'Cross-Lingual Pragmatic "
+            "Inference in Low-Resource Settings', would build upon your group's "
+            "published work on Japanese discourse markers (Nakamura et al., 2024) "
+            "and our recent results in zero-shot transfer for pragmatic tasks "
+            "(Singh & O'Brien, 2025). We believe the complementary nature of our "
+            "methodological approaches — your group's expertise in linguistically "
+            "motivated feature engineering and our team's focus on large-scale "
+            "pre-training — presents a strong basis for a productive partnership.\n\n"
+            "The collaboration would involve a twelve-month exchange programme for "
+            "two doctoral researchers (one from each institution), four joint "
+            "workshops to be held alternately in Edinburgh and Kyoto, and a shared "
+            "annotated corpus to be released under a Creative Commons licence upon "
+            "project completion.\n\n"
+            "I would welcome the opportunity to arrange a video conference at your "
+            "earliest convenience to discuss the proposal in greater detail. Please "
+            "find attached a two-page concept note for your review. I look forward "
+            "to your response.\n\n"
+            "Yours sincerely,\nDr. Ananya Singh\n"
+            "Reader in Computational Linguistics, University of Edinburgh"
+        ),
+        "expected": "formal",
+    },
 ]
 
 
