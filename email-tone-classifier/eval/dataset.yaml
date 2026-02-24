@@ -1,0 +1,141 @@
+# Test dataset for email tone classifier evaluation.
+#
+# Each test case has:
+#   - vars: template variables (the email to classify)
+#   - assert: conditions the output must satisfy
+#
+# Assertion types used:
+#   - contains: output must contain this string
+#   - not-contains: output must NOT contain this string
+#   - llm-rubric: use an LLM to grade the output (powerful but slower)
+#   - javascript: custom JS assertion for full control
+
+# --- Formal emails ---
+- description: "Formal business request"
+  vars:
+    email: >
+      Dear Dr. Patel, I am writing to formally request an extension on the
+      project deadline. Please let me know your availability for a meeting
+      this week. Best regards, Jordan.
+  assert:
+    - type: contains
+      value: "formal"
+    - type: not-contains
+      value: "casual"
+
+- description: "Formal legal notice"
+  vars:
+    email: >
+      To Whom It May Concern, This letter serves as formal notice of
+      termination of the service agreement dated March 15, 2024, in
+      accordance with Section 4.2 of the contract.
+  assert:
+    - type: contains
+      value: "formal"
+
+# --- Casual emails ---
+- description: "Casual friend message"
+  vars:
+    email: "hey! saw that new café on st-denis, wanna check it out tmrw?"
+  assert:
+    - type: contains
+      value: "casual"
+
+- description: "Casual work ping"
+  vars:
+    email: "lol yeah that meeting was wild. anyway wanna pair on that PR later?"
+  assert:
+    - type: contains
+      value: "casual"
+
+# --- Urgent emails ---
+- description: "Production outage"
+  vars:
+    email: >
+      CRITICAL: The deployment pipeline is broken and customers are seeing
+      500 errors. We need all hands on deck NOW. Drop everything.
+  assert:
+    - type: contains
+      value: "urgent"
+    - type: not-contains
+      value: "angry"
+
+- description: "Deadline pressure"
+  vars:
+    email: >
+      The client demo is in 2 hours and the staging environment is still
+      down. I need someone to look at this IMMEDIATELY or we lose the deal.
+  assert:
+    - type: contains
+      value: "urgent"
+
+# --- Friendly emails ---
+- description: "Thank you note"
+  vars:
+    email: >
+      Just wanted to say thanks for helping me debug that issue yesterday.
+      You really saved my day! Looking forward to working together more.
+  assert:
+    - type: contains
+      value: "friendly"
+
+- description: "Welcome message"
+  vars:
+    email: >
+      Welcome to the team! We're so excited to have you on board. Don't
+      hesitate to reach out if you need anything at all — we're here to help.
+  assert:
+    - type: contains
+      value: "friendly"
+
+# --- Angry emails ---
+- description: "Customer complaint"
+  vars:
+    email: >
+      I have been waiting three weeks for a response. This is completely
+      unacceptable and I am considering escalating this to your manager.
+      Fix this now.
+  assert:
+    - type: contains
+      value: "angry"
+
+- description: "Service frustration"
+  vars:
+    email: >
+      Your product crashed and I lost 4 hours of work. This is the third
+      time this month. I want a full refund. Absolutely terrible service.
+  assert:
+    - type: contains
+      value: "angry"
+
+# --- Ambiguous / tricky cases (great for learning!) ---
+- description: "Politely angry (tests nuance)"
+  vars:
+    email: >
+      I appreciate your team's efforts, but I must express my deep
+      disappointment with the repeated delays. This situation has become
+      untenable and I expect immediate corrective action.
+  assert:
+    # This one is intentionally ambiguous — could be formal or angry.
+    # Use llm-rubric for nuanced grading:
+    - type: llm-rubric
+      value: >
+        The output should classify this email as either 'formal' or 'angry'.
+        Both are reasonable. The email is politely worded but clearly
+        frustrated. Give a passing grade if the output contains either
+        'formal' or 'angry'.
+
+- description: "Urgent but friendly"
+  vars:
+    email: >
+      Hey team! Quick heads up — the release is tomorrow and we still
+      have 3 blockers. Would love your help knocking these out today
+      if possible! You all rock.
+  assert:
+    # Accept urgent, friendly, or casual as reasonable answers
+    - type: javascript
+      value: |
+        const output = String(output).toLowerCase();
+        const acceptable = ['urgent', 'friendly', 'casual'];
+        const pass = acceptable.some(tone => output.includes(tone));
+        return { pass, score: pass ? 1.0 : 0.0, reason: `Got: ${output}` };

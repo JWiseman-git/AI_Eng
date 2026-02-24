@@ -1,0 +1,51 @@
+# Promptfoo evaluation config for email tone classification.
+#
+# Run with:
+#   cd eval
+#   promptfoo eval
+#   promptfoo view
+#
+# Docs: https://www.promptfoo.dev/docs/configuration/reference
+
+description: "Email tone classifier — compare prompt strategies"
+
+# --- Prompt variants to evaluate head-to-head ---
+prompts:
+  # Variant 1: Simple direct instruction
+  - id: "simple"
+    raw: |
+      [{"role": "system", "content": "You are an email tone classifier."},
+       {"role": "user", "content": "Classify the tone of this email as exactly one of: formal, casual, urgent, friendly, angry.\n\nEmail: {{email}}\n\nRespond with ONLY the tone label, nothing else."}]
+
+  # Variant 2: Chain-of-thought
+  - id: "chain_of_thought"
+    raw: |
+      [{"role": "system", "content": "You are an expert email tone analyst. You always reason step by step before giving your final classification."},
+       {"role": "user", "content": "Analyze the tone of the following email.\n\nEmail: {{email}}\n\nStep 1: Identify key phrases that indicate tone.\nStep 2: Consider the overall sentiment.\nStep 3: Choose exactly one label from: formal, casual, urgent, friendly, angry.\n\nFormat your response as:\nREASONING: <your analysis>\nTONE: <label>"}]
+
+  # Variant 3: Few-shot
+  - id: "few_shot"
+    raw: |
+      [{"role": "system", "content": "You are an email tone classifier. Learn from the examples below."},
+       {"role": "user", "content": "Examples:\n\nEmail: \"Dear Mr. Smith, Please find attached the Q3 report.\"\nTone: formal\n\nEmail: \"Hey! Wanna grab lunch? 😊\"\nTone: casual\n\nEmail: \"NEED THIS FIXED BY EOD. Production is down.\"\nTone: urgent\n\nEmail: \"Thanks so much for your help, you made my day!\"\nTone: friendly\n\nEmail: \"This is unacceptable. I want a refund immediately.\"\nTone: angry\n\nNow classify this email:\n\nEmail: \"{{email}}\"\nTone:"}]
+
+# --- Provider: Anthropic Claude ---
+providers:
+  - id: "anthropic:messages:claude-sonnet-4-20250514"
+    config:
+      temperature: 0
+      max_tokens: 256
+
+# --- Test dataset with assertions ---
+tests: dataset.yaml
+
+# --- Default assertions applied to every test ---
+defaultTest:
+  options:
+    provider:
+      id: "anthropic:messages:claude-sonnet-4-20250514"
+      config:
+        temperature: 0
+
+# --- Output settings ---
+outputPath: results.json
