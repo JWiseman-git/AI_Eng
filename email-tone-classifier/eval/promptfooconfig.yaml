@@ -31,7 +31,7 @@ prompts:
 
 # --- Provider: Anthropic Claude ---
 providers:
-  - id: "anthropic:messages:claude-sonnet-4-20250514"
+  - id: "anthropic:messages:claude-sonnet-4-6"
     config:
       temperature: 0
       max_tokens: 256
@@ -43,7 +43,7 @@ tests: dataset.yaml
 defaultTest:
   options:
     provider:
-      id: "anthropic:messages:claude-sonnet-4-20250514"
+      id: "anthropic:messages:claude-sonnet-4-6"
       config:
         temperature: 0
 

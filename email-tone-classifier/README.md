@@ -94,7 +94,7 @@ Then open your local Langfuse dashboard at http://localhost:3000 to explore:
 ### Things to try
 - Compare how different prompt variants appear in the Langfuse trace view
 - Look at latency differences between prompt strategies
-- Check the "Prompts" tab to see managed prompt versions
+- Inspect token usage and cost in the "Generations" tab
 
 ## Part 2: Promptfoo Evaluation (~45 min)
 
@@ -119,9 +119,14 @@ This opens a local web UI showing:
 
 ## Part 3: Combine Both (~30 min)
 
-The Promptfoo config is already set up to send traces to Langfuse via the
-custom provider in `src/classifier.py`. After running `promptfoo eval`, check
-Langfuse to see all evaluation traces tagged with `source: promptfoo`.
+Run `promptfoo eval` from `eval/`, then run `uv run python -m src.demo` to
+generate Langfuse traces for the same emails. Compare how each prompt variant
+performed in the offline Promptfoo evaluation versus the live Langfuse traces.
+
+To wire Promptfoo directly into Langfuse, you can replace the built-in
+`anthropic:messages:...` provider in `promptfooconfig.yaml` with a custom
+provider that calls `src/classifier.py` — each evaluation run will then appear
+as tagged traces in your Langfuse dashboard.
 
 ## Key Takeaways
 

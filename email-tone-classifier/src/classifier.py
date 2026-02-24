@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import re
 
-import anthropic
+import openai
 from langfuse import Langfuse
 
 from src.prompts import ALL_VARIANTS, PromptVariant
@@ -19,13 +19,13 @@ from src.prompts import ALL_VARIANTS, PromptVariant
 # Valid tone labels the classifier can return
 VALID_TONES = frozenset({"formal", "casual", "urgent", "friendly", "angry"})
 
-MODEL = "claude-sonnet-4-20250514"
+MODEL = "gpt-4o-mini"
 
 
 class ToneClassifier:
-    """Classifies email tone using Claude, with full Langfuse tracing."""
+    """Classifies email tone using OpenAI, with full Langfuse tracing."""
 
-    def __init__(self, langfuse: Langfuse, client: anthropic.Anthropic) -> None:
+    def __init__(self, langfuse: Langfuse, client: openai.OpenAI) -> None:
         self.langfuse = langfuse
         self.client = client
 
@@ -50,79 +50,84 @@ class ToneClassifier:
         """
         variant = ALL_VARIANTS[variant_name]
 
-        # -- Create a top-level Langfuse trace --
-        trace = self.langfuse.trace(
+        # -- Create a top-level Langfuse trace (v3: root span = trace) --
+        with self.langfuse.start_as_current_span(
             name="classify_email_tone",
-            tags=tags or [],
-            metadata={
-                "variant": variant_name,
-                **(metadata or {}),
-            },
-        )
+            input={"email": email},
+            metadata={"variant": variant_name, **(metadata or {})},
+        ) as root_span:
+            root_span.update_trace(tags=tags or [])
 
-        # -- Span for input preprocessing --
-        preprocess_span = trace.span(
-            name="preprocess",
-            input={"raw_email": email},
-        )
-        cleaned = email.strip()
-        preprocess_span.end(output={"cleaned_email": cleaned, "char_count": len(cleaned)})
+            # -- Span for input preprocessing --
+            preprocess_span = root_span.start_span(
+                name="preprocess",
+                input={"raw_email": email},
+            )
+            cleaned = email.strip()
+            preprocess_span.update(output={"cleaned_email": cleaned, "char_count": len(cleaned)})
+            preprocess_span.end()
 
-        # -- Generation: the actual LLM call --
-        user_content = variant.user_template.format(email=cleaned)
+            # -- Generation: the actual LLM call --
+            user_content = variant.user_template.format(email=cleaned)
 
-        generation = trace.generation(
-            name="llm_classification",
-            model=MODEL,
-            model_parameters={"temperature": 0.0, "max_tokens": 256},
-            input=[
-                {"role": "system", "content": variant.system},
-                {"role": "user", "content": user_content},
-            ],
-            metadata={"variant": variant_name},
-        )
+            generation = root_span.start_generation(
+                name="llm_classification",
+                model=MODEL,
+                model_parameters={"temperature": "0.0", "max_tokens": 256},
+                input=[
+                    {"role": "system", "content": variant.system},
+                    {"role": "user", "content": user_content},
+                ],
+                metadata={"variant": variant_name},
+            )
 
-        response = self.client.messages.create(
-            model=MODEL,
-            max_tokens=256,
-            temperature=0.0,
-            system=variant.system,
-            messages=[{"role": "user", "content": user_content}],
-        )
+            response = self.client.chat.completions.create(
+                model=MODEL,
+                max_tokens=256,
+                temperature=0.0,
+                messages=[
+                    {"role": "system", "content": variant.system},
+                    {"role": "user", "content": user_content},
+                ],
+            )
 
-        raw_text = response.content[0].text
-        usage = response.usage
+            raw_text = response.choices[0].message.content
+            usage = response.usage
 
-        generation.end(
-            output=raw_text,
-            usage={
-                "input": usage.input_tokens,
-                "output": usage.output_tokens,
-                "total": usage.input_tokens + usage.output_tokens,
-            },
-        )
+            generation.update(
+                output=raw_text,
+                usage_details={
+                    "input": usage.prompt_tokens,
+                    "output": usage.completion_tokens,
+                    "total": usage.total_tokens,
+                },
+            )
+            generation.end()
 
-        # -- Span for output parsing --
-        parse_span = trace.span(
-            name="parse_tone",
-            input={"raw_response": raw_text},
-        )
-        tone = self._extract_tone(raw_text, variant)
-        is_valid = tone in VALID_TONES
-        parse_span.end(output={"tone": tone, "valid": is_valid})
+            # -- Span for output parsing --
+            parse_span = root_span.start_span(
+                name="parse_tone",
+                input={"raw_response": raw_text},
+            )
+            tone = self._extract_tone(raw_text, variant)
+            is_valid = tone in VALID_TONES
+            parse_span.update(output={"tone": tone, "valid": is_valid})
+            parse_span.end()
 
-        # -- Score the trace with a confidence metric --
-        trace.score(
-            name="parse_success",
-            value=1.0 if is_valid else 0.0,
-            comment=f"Extracted tone: {tone}" if is_valid else "Failed to parse tone",
-        )
+            # -- Score the trace with a confidence metric --
+            root_span.score_trace(
+                name="parse_success",
+                value=1.0 if is_valid else 0.0,
+                comment=f"Extracted tone: {tone}" if is_valid else "Failed to parse tone",
+            )
+
+            trace_id = self.langfuse.get_current_trace_id()
 
         return {
             "tone": tone,
             "raw_response": raw_text,
             "variant": variant_name,
-            "trace_id": trace.id,
+            "trace_id": trace_id,
         }
 
     @staticmethod

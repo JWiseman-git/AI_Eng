@@ -1,13 +1,12 @@
 [project]
 name = "email-tone-classifier"
 version = "0.1.0"
-description = "Learn Langfuse + Promptfoo with Anthropic Claude"
+description = "Learn Langfuse + Promptfoo with OpenAI"
 requires-python = ">=3.11"
 dependencies = [
-    "anthropic>=0.40.0",
+    "openai>=1.0.0",
     "langfuse>=2.50.0",
     "python-dotenv>=1.0.0",
-    "pydantic>=2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -28,6 +27,9 @@ line_length = 88
 [tool.pylama]
 linters = "pycodestyle,pyflakes"
 max_line_length = 88
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
 
 [build-system]
 requires = ["hatchling"]
