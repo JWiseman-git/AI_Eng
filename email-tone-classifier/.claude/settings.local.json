@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(uv sync:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(head:*)",
+      "Bash(node:*)",
+      "Bash(which npm:*)",
+      "Bash(tail:*)",
+      "Bash(set -a && source ../.env && set +a && ~/.local/bin/promptfoo eval --no-cache 2>&1)"
+    ]
+  }
+}

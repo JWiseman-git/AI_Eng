@@ -29,9 +29,9 @@ prompts:
       [{"role": "system", "content": "You are an email tone classifier. Learn from the examples below."},
        {"role": "user", "content": "Examples:\n\nEmail: \"Dear Mr. Smith, Please find attached the Q3 report.\"\nTone: formal\n\nEmail: \"Hey! Wanna grab lunch? 😊\"\nTone: casual\n\nEmail: \"NEED THIS FIXED BY EOD. Production is down.\"\nTone: urgent\n\nEmail: \"Thanks so much for your help, you made my day!\"\nTone: friendly\n\nEmail: \"This is unacceptable. I want a refund immediately.\"\nTone: angry\n\nNow classify this email:\n\nEmail: \"{{email}}\"\nTone:"}]
 
-# --- Provider: Anthropic Claude ---
+# --- Provider: OpenAI ---
 providers:
-  - id: "anthropic:messages:claude-sonnet-4-20250514"
+  - id: "openai:chat:gpt-4o"
     config:
       temperature: 0
       max_tokens: 256
@@ -43,7 +43,7 @@ tests: dataset.yaml
 defaultTest:
   options:
     provider:
-      id: "anthropic:messages:claude-sonnet-4-20250514"
+      id: "openai:chat:gpt-4o"
       config:
         temperature: 0
 
